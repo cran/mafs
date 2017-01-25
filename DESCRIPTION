@@ -1,7 +1,7 @@
 Package: mafs
 Type: Package
 Title: Multiple Automatic Forecast Selection
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: person("Sillas", "Gonzaga", email = "sillas.gonzaga@gmail.com",
     role = c("aut", "cre"))
 Description: Fits several forecast models available from the forecast package
@@ -12,15 +12,15 @@ LazyData: TRUE
 Imports: fracdiff, tseries, timeDate, cmprsk, etm, forecast,
         forecastHybrid, CombMSC, Epi, quadprog, colorspace, zoo, Rcpp,
         gtable, scales, plyr, numDeriv, ggplot2, munsell, tidyr,
-        ggseas, stats
+        ggseas, stats, tictoc
 Suggests: testthat
 Depends:
 URL: http://github.com/sillasgonzaga/mafs
 BugReports: http://github.com/sillasgonzaga/mafs/issues
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Packaged: 2016-11-18 22:48:26 UTC; sillas
+Packaged: 2017-01-25 02:53:12 UTC; sillas
 Author: Sillas Gonzaga [aut, cre]
 Maintainer: Sillas Gonzaga <sillas.gonzaga@gmail.com>
 Repository: CRAN
-Date/Publication: 2016-11-19 10:15:29
+Date/Publication: 2017-01-25 09:03:05

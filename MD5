@@ -1,11 +1,11 @@
-e65aab7d75dc8bbefbe3d4dea7586fe8 *DESCRIPTION
+c21b86c022303f23243e517e99fe4020 *DESCRIPTION
 fa22e16ebbe6638b2bd253338fbded9f *LICENSE
 4664799d7ccf272bf5d60bf489475d52 *NAMESPACE
-0d0a11feafb3207cc29bb9c700dab953 *R/main.R
-2f3bf9950e54de8a18f3b0fe1e70c17a *man/apply_all_models.Rd
+8e9e6188a6caef36917c5c6687b45215 *R/main.R
+88c9f1fc9ce3db45827990467b556f8a *man/apply_all_models.Rd
 5c07b673dd4d41ede640a991a4ab5541 *man/apply_selected_model.Rd
 7701afc80b8a01174bbdd0ab4aa97ba4 *man/available_models.Rd
 b80ef9ca84b009e93a693bbf27ad9122 *man/error_metrics.Rd
 f03888624857e33d96dca22c947210dc *man/gg_fit.Rd
-a25ba935fd338b286cdfd95dcfab4da4 *man/select_forecast.Rd
+5ef3cff37dda17a7d96a748fb3d312db *man/select_forecast.Rd
 188e0079dd4ed06c17824ef564957085 *tests/testthat.R
