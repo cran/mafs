@@ -7,19 +7,23 @@
 #' @title Select a model to forecast a time series object.
 #' @description
 #' Apply a chosen forecast model to a time series object. Basically a wrapper for many functions from the forecast package.
-#' Please run avaiableModels() to see the list of available modes to use as the model.name argument of this function.
+#' Please run available_models() to see the list of available modes to use as the model.name argument of this function.
 #' @param x A ts object.
 #' @param model_name A string indicating the name of the forecast model.
 #' @param horizon the forecast horizon length
 #' @return A forecast object
 #' @examples
+#' \dontrun{
 #' apply_selected_model(AirPassengers, "auto.arima", 6)
+#' }
 #' @export
 apply_selected_model <- function(x, model_name, horizon) {
 
   available_models <- available_models()
 
-  if (!(model_name %in% available_models)) stop("Your model is not available. Please run avaiableModels() to see the list of available models")
+  if (!(model_name %in% available_models)) {
+    stop("Your model is not available. Please run avaiableModels() to see the list of available models")
+  }
   # former aplicarMelhorModelo()
   switch(model_name,
          "auto.arima" = auto.arima(x, ic='aicc', stepwise=FALSE), # 1
@@ -40,6 +44,7 @@ apply_selected_model <- function(x, model_name, horizon) {
          "croston"  = croston(x, h = horizon), #16
          "tslm"  = tslm(x ~ trend + season), #17
          "hybrid" = forecastHybrid::hybridModel(x, verbose = FALSE) #18
+         #,"baggedETS" = baggedETS(x)
   )
 }
 
@@ -51,9 +56,12 @@ apply_selected_model <- function(x, model_name, horizon) {
 #' available_models()
 #' @export
 available_models <- function() {
-  return(c("auto.arima", "ets", "nnetar", "tbats", "bats","stlm_ets",
-           "stlm_arima", "StructTS", "meanf", "naive", "snaive", "rwf",
-           "rwf_drift", "splinef", "thetaf", "croston", "tslm", "hybrid"))
+  return(c(
+    "auto.arima", "ets", "nnetar", "tbats", "bats","stlm_ets",
+    "stlm_arima", "StructTS", "meanf", "naive", "snaive", "rwf",
+    "rwf_drift", "splinef", "thetaf", "croston", "tslm", "hybrid"
+    #"baggedETS"
+    ))
 }
 
 
@@ -78,7 +86,7 @@ error_metrics <- function(){
 #' @details
 #' This functions loops the output from available_models(), uses it as the
 #' model.name argument for apply_selected_model() and return a list of length
-#' 18 in which each element is a forecast model.
+#' 19 in which each element is a forecast model.
 #' Depending on some of the characteristics of the time series object used as
 #' the input for this function, the model might not be created. For example,
 #' if you try to fit a neural network model to a short time series, it will
@@ -90,13 +98,14 @@ error_metrics <- function(){
 #' @param horizon The forecast horizon length
 #' @param dont_apply Character vector. Choose one or more models that will not
 #'   be used on select_forecast().
+#' @param verbose logical. Set TRUE if you want mafs to tell you what models are running.
 #' @return A list of forecast objects from apply_selected_model()
 #' @examples
 #' \dontrun{
 #' apply_all_models(austres, 6)
 #' }
 #' @export
-apply_all_models <- function(x, horizon, dont_apply = "") {
+apply_all_models <- function(x, horizon, dont_apply = "", verbose = FALSE) {
   # former aplicarTodosModelos
 
   mods <- available_models()
@@ -107,6 +116,10 @@ apply_all_models <- function(x, horizon, dont_apply = "") {
 
   for (i in 1:length(mods)) {
     mod <- mods[i]
+    ## prints message if verbose is TRUE
+    if (verbose) {
+      message(sprintf("Applying model %s", mod))
+    }
     ## add run time
     tictoc::tic()
 
@@ -144,6 +157,7 @@ apply_all_models <- function(x, horizon, dont_apply = "") {
 #'   model from apply_all_models(). See error_metrics() for the available metrics.
 #' @param dont_apply Character vector. Choose one or more models that will not
 #'   be used on select_forecast().
+#' @param verbose logical. Set TRUE if you want mafs to tell you what models are running.
 #' @return A list of three objects:
 #' @section df_models:
 #'  A data.frame with the accuracy metrics of all models applied to x
@@ -157,17 +171,18 @@ apply_all_models <- function(x, horizon, dont_apply = "") {
 #' select_forecast(austres, 6, 12, "MAPE")
 #' }
 #' @export
-select_forecast <- function(x, test_size, horizon, error, dont_apply = "") {
+select_forecast <- function(x, test_size, horizon, error, dont_apply = "", verbose = FALSE) {
   # Checks if defined error metric is available
   error_metrics <- error_metrics()
   if (!(error %in% error_metrics)) stop("Your error metric is not available. Please run error_metrics() to see the list of available metrics.")
 
-  #browser()
+
 
   x_split <- CombMSC::splitTrainTest(x, length(x) - test_size)
   training <- x_split$train
   test <- x_split$test
-  temp <- apply_all_models(training, horizon = test_size, dont_apply = dont_apply)
+  temp <- apply_all_models(training, horizon = test_size,
+                           dont_apply = dont_apply, verbose = verbose)
 
   models_list <- temp$models
   df_runtime <- temp$df_runtime
@@ -208,13 +223,16 @@ select_forecast <- function(x, test_size, horizon, error, dont_apply = "") {
     return(m)
   }
 
-
   acc <- lapply(acc, removeTheil)
   acc <- Reduce(rbind, acc)
   row.names(acc) <- NULL
   acc <- as.data.frame(acc)
 
-  acc <- na.omit(acc) # some times stlm models produces NA.
+  # remove rows where the chosen metric has an invalid result (if there is any)
+  ind_rm <- which(is.na(acc[[error]]))
+  if (length(ind_rm) > 0) acc <- acc[-ind_rm, ]
+
+  #acc <- na.omit(acc) # some times stlm models produces NA.
   rownames(acc) <- seq(1, nrow(acc), 1) # fixes na.omit() bug with rownames
   acc$model <- df_runtime$model
 
@@ -231,7 +249,7 @@ select_forecast <- function(x, test_size, horizon, error, dont_apply = "") {
   best_model_name <- acc$model[ind_best_model]
   acc$best_model <- best_model_name
 
-  # Applys apply_selected_model using the best forecast model from the previous lines
+  # Applies apply_selected_model using the best forecast model from the previous lines
   best_forecast <- apply_selected_model(x, best_model_name, horizon)
   best_forecast <- forecast(best_forecast, h = horizon)
 
@@ -265,13 +283,13 @@ select_forecast <- function(x, test_size, horizon, error, dont_apply = "") {
 
 #' @title Graphical results of forecast models
 #' @description
-#' Applys a selected forecast model to a time series and plot the fitted
+#' Applies a selected forecast model to a time series and plot the fitted
 #' series and the forecasted values along with the original series.
 #' @param x A ts object.
 #' @param test_size Integer. The desired length of the test set object to be used
 #'   to train the model and compare the forecasted with the observed values.
 #' @param model_name A string indicating the name of the forecast model.
-#' @return A ggplot object
+#' @return A ggplot2 object
 #' @examples
 #' gg_fit(AirPassengers, 12, "snaive")
 #' @export

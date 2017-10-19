@@ -1,7 +1,7 @@
 Package: mafs
 Type: Package
 Title: Multiple Automatic Forecast Selection
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: person("Sillas", "Gonzaga", email = "sillas.gonzaga@gmail.com",
     role = c("aut", "cre"))
 Description: Fits several forecast models available from the forecast package
@@ -17,10 +17,10 @@ Suggests: testthat
 Depends:
 URL: http://github.com/sillasgonzaga/mafs
 BugReports: http://github.com/sillasgonzaga/mafs/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-01-25 02:53:12 UTC; sillas
+Packaged: 2017-10-19 12:05:55 UTC; sillas
 Author: Sillas Gonzaga [aut, cre]
 Maintainer: Sillas Gonzaga <sillas.gonzaga@gmail.com>
 Repository: CRAN
-Date/Publication: 2017-01-25 09:03:05
+Date/Publication: 2017-10-19 12:15:23 UTC
